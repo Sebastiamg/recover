@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataBaseSourceConfig } from './config/db.config';
+import { appConfigSchema } from './config/schemas/env-schemas';
 
 @Module({
   imports: [
@@ -12,8 +13,10 @@ import { DataBaseSourceConfig } from './config/db.config';
       isGlobal: true,
       expandVariables: true,
       load: [DataBaseSourceConfig],
+      validationSchema: appConfigSchema,
     }),
     TypeOrmModule.forRootAsync({
+      imports: [AuthModule, UserModule],
       useFactory: (dbConfig: ConfigType<typeof DataBaseSourceConfig>) => {
         return {
           type: dbConfig.DB_TYPE,
@@ -26,8 +29,6 @@ import { DataBaseSourceConfig } from './config/db.config';
       },
       inject: [DataBaseSourceConfig.KEY],
     }),
-    AuthModule,
-    UserModule,
   ],
 })
 export class AppModule {}
